@@ -1,0 +1,36 @@
+# --- Dependencies (Thư viện) ---
+node_modules/
+package-lock.json
+# (Lưu ý: package-lock.json có thể commit hoặc không tùy team, 
+# nhưng node_modules thì TUYỆT ĐỐI KHÔNG commit)
+
+# --- Environment Variables (Bảo mật - QUAN TRỌNG NHẤT) ---
+# Chứa thông tin DB, mật khẩu, API Key -> Không được để lộ
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Logs (File ghi lỗi) ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- IDE & Editor (Cấu hình cá nhân của code editor) ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Operating System (File rác của hệ điều hành) ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# --- Build & Testing (Nếu sau này có build hoặc test) ---
+dist/
+build/
+coverage/
