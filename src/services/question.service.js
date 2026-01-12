@@ -10,15 +10,16 @@ async function createQuestion(payload) {
 }
 
 async function getQuestionById(id) {
-  return QuestionModel.findById(id);
+
+  return QuestionModel.findById(id).populate('setId');
 }
 
 async function updateQuestion(id, payload) {
-  return QuestionModel.findByIdAndUpdate(id, payload, { new: true });
+  return QuestionModel.findByIdAndUpdate(id, payload, { new: true }).populate('setId');;
 }
 
 async function deleteQuestion(id) {
-  const q = await QuestionModel.findById(id);
+  const q = await QuestionModel.findById(id).populate('setId');;
   if (!q) return null;
   await QuestionModel.findByIdAndDelete(id);
   await setService.incrementQuestionCount(q.setId, -1);
@@ -28,7 +29,7 @@ async function deleteQuestion(id) {
 async function listQuestions(filter = {}, options = {}) {
   return QuestionModel.find(filter)
     .sort({ createdAt: -1 })
-    .limit(options.limit || 0);
+    .limit(options.limit || 0).populate('setId');;
 }
 
 module.exports = {

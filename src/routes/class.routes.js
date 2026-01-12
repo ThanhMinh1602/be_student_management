@@ -1,17 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/set.controller');
+const controller = require('../controllers/class.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 /**
  * @openapi
- * /api/sets:
+ * /api/classes:
+ *   get:
+ *     tags:
+ *       - Classes
+ *     summary: List classes
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Classes list
+ */
+router.get('/', authMiddleware, controller.list);
+
+/**
+ * @openapi
+ * /api/classes:
  *   post:
  *     tags:
- *       - Sets
- *     summary: Create a question set
- *     security:
- *       - bearerAuth: []
+ *       - Classes
+ *     summary: Create a class
  *     requestBody:
  *       required: true
  *       content:
@@ -21,73 +43,42 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *             properties:
  *               name:
  *                 type: string
- *             required:
- *               - name
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       201:
- *         description: Set created
+ *         description: Class created
  */
-router.post(
-  '/',
-  authMiddleware,
-  controller.createSet
-);
+router.post('/', authMiddleware, controller.add);
 
 /**
  * @openapi
- * /api/sets:
+ * /api/classes/{id}:
  *   get:
  *     tags:
- *       - Sets
- *     summary: List sets
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of sets
- */
-router.get(
-  '/',
-  authMiddleware,
-  
-  controller.listSets
-);
-
-/**
- * @openapi
- * /api/sets/{id}:
- *   get:
- *     tags:
- *       - Sets
- *     summary: Get a set by id
- *     security:
- *       - bearerAuth: []
+ *       - Classes
+ *     summary: Get a class by id
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Set
+ *         description: Class
  */
-router.get(
-  '/:id',
-  authMiddleware,
-  
-  controller.getSet
-);
+router.get('/:id', authMiddleware, controller.get);
 
 /**
  * @openapi
- * /api/sets/{id}:
+ * /api/classes/{id}:
  *   put:
  *     tags:
- *       - Sets
- *     summary: Update a set
- *     security:
- *       - bearerAuth: []
+ *       - Classes
+ *     summary: Update a class
  *     parameters:
  *       - in: path
  *         name: id
@@ -103,41 +94,33 @@ router.get(
  *             properties:
  *               name:
  *                 type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Updated set
+ *         description: Updated
  */
-router.put(
-  '/:id',
-  authMiddleware,
-  
-  controller.updateSet
-);
+router.put('/:id', authMiddleware, controller.update);
 
 /**
  * @openapi
- * /api/sets/{id}:
+ * /api/classes/{id}:
  *   delete:
  *     tags:
- *       - Sets
- *     summary: Delete a set and its questions
- *     security:
- *       - bearerAuth: []
+ *       - Classes
+ *     summary: Delete a class
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Deleted
  */
-router.delete(
-  '/:id',
-  authMiddleware,
-  
-  controller.deleteSet
-);
+router.delete('/:id', authMiddleware, controller.remove);
 
 module.exports = router;

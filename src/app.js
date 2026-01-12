@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth.routes');
 const setRoutes = require('./routes/set.routes');
 const questionRoutes = require('./routes/question.routes');
 const debugRoutes = require('./routes/debug.routes');
+const studentRoutes = require('./routes/student.routes');
+const classRoutes = require('./routes/class.routes');
 
 const app = express();
 app.use(cors());
@@ -21,5 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sets', setRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/classes', classRoutes);
 
 module.exports = app;
