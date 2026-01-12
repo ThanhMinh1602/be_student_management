@@ -5,14 +5,24 @@ const JWT_SECRET = process.env.JWT_SECRET || 'changeme_secret';
 
 async function authMiddleware(req, res, next) {
   try {
-    const auth = req.headers.authorization;
-    if (!auth || !auth.startsWith('Bearer ')) {
+    // Accept token from Authorization header, x-access-token header, query param, or body (for debugging/dev)
+    const authHeader = req.headers.authorization;
+    const tokenFromHeader =
+      authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+    const token =
+      tokenFromHeader ||
+      req.headers['x-access-token'] ||
+      req.query.token ||
+      req.body.token;
+
+    if (!token) {
       return res
         .status(401)
         .json({ success: false, message: 'Authorization token missing' });
     }
 
-    const token = auth.split(' ')[1];
     let payload;
     try {
       payload = jwt.verify(token, JWT_SECRET);
