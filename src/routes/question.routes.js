@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/question.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/role.middleware');
 
 /**
  * @openapi
@@ -11,6 +10,8 @@ const { requireRole } = require('../middlewares/role.middleware');
  *     tags:
  *       - Questions
  *     summary: Create a question
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -47,7 +48,6 @@ const { requireRole } = require('../middlewares/role.middleware');
 router.post(
   '/',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.createQuestion
 );
 
@@ -58,6 +58,8 @@ router.post(
  *     tags:
  *       - Questions
  *     summary: List questions (optionally filter by setId)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: setId
@@ -70,7 +72,6 @@ router.post(
 router.get(
   '/',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.listQuestions
 );
 
@@ -81,6 +82,8 @@ router.get(
  *     tags:
  *       - Questions
  *     summary: Get a question by id
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -94,7 +97,6 @@ router.get(
 router.get(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.getQuestion
 );
 
@@ -105,6 +107,8 @@ router.get(
  *     tags:
  *       - Questions
  *     summary: Update a question
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,7 +143,6 @@ router.get(
 router.put(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.updateQuestion
 );
 
@@ -150,6 +153,8 @@ router.put(
  *     tags:
  *       - Questions
  *     summary: Delete a question
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -163,7 +168,6 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.deleteQuestion
 );
 

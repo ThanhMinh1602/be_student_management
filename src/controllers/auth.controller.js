@@ -1,37 +1,30 @@
 const { registerSchema, loginSchema } = require('../helpers/validation_schema');
 const authService = require('../services/auth.service');
+const response = require('../helpers/response');
 
 async function register(req, res) {
   try {
     const { error, value } = registerSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
+    if (error) return response.error(res, error.message, 400);
 
     const user = await authService.registerUser(value);
-    return res
-      .status(201)
-      .json({ success: true, data: user, message: 'User registered' });
+    return response.success(res, user, 'User registered', 201);
   } catch (err) {
     const status = err.status || 500;
-    return res.status(status).json({ success: false, message: err.message });
+    return response.error(res, err.message, status);
   }
 }
 
 async function login(req, res) {
   try {
     const { error, value } = loginSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
+    if (error) return response.error(res, error.message, 400);
 
     const { token, user } = await authService.loginUser(value);
-    return res.json({
-      success: true,
-      data: { token, user },
-      message: 'Logged in',
-    });
+    return response.success(res, { token, user }, 'Logged in', 200);
   } catch (err) {
     const status = err.status || 500;
-    return res.status(status).json({ success: false, message: err.message });
+    return response.error(res, err.message, status);
   }
 }
 
@@ -39,13 +32,10 @@ async function me(req, res) {
   try {
     // `authMiddleware` ensures req.user is populated
     const user = req.user;
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found' });
-    return res.json({ success: true, data: user, message: 'Current user' });
+    if (!user) return response.error(res, 'User not found', 404);
+    return response.success(res, user, 'Current user', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 

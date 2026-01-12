@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/auth.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-
+const validate = require('../middlewares/validate.middleware');
+const { registerSchema, loginSchema } = require('../helpers/validation_schema');
 /**
  * @openapi
  * /api/auth/register:
@@ -33,7 +34,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       201:
  *         description: User created
  */
-router.post('/register', controller.register);
+router.post('/register', validate(registerSchema), controller.register);
 
 /**
  * @openapi
@@ -60,7 +61,7 @@ router.post('/register', controller.register);
  *       200:
  *         description: Authenticated
  */
-router.post('/login', controller.login);
+router.post('/login', validate(loginSchema), controller.login);
 
 /**
  * @openapi

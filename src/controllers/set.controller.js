@@ -1,29 +1,21 @@
 const setService = require('../services/set.service');
-const {
-  setCreateSchema,
-  setUpdateSchema,
-} = require('../helpers/validation_schema');
+const response = require('../helpers/response');
 
 async function createSet(req, res) {
   try {
-    const { error, value } = setCreateSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
-    const set = await setService.createSet(value);
-    return res
-      .status(201)
-      .json({ success: true, data: set, message: 'Set created' });
+    const set = await setService.createSet(req.body);
+    return response.success(res, set, 'Set created', 201);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
 async function listSets(req, res) {
   try {
     const sets = await setService.getAllSets();
-    return res.json({ success: true, data: sets, message: 'Sets list' });
+    return response.success(res, sets, 'Sets list', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
@@ -31,26 +23,21 @@ async function getSet(req, res) {
   try {
     const { id } = req.params;
     const set = await setService.getSetById(id);
-    if (!set)
-      return res.status(404).json({ success: false, message: 'Set not found' });
-    return res.json({ success: true, data: set, message: 'Set found' });
+    if (!set) return response.error(res, 'Set not found', 404);
+    return response.success(res, set, 'Set found', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
 async function updateSet(req, res) {
   try {
     const { id } = req.params;
-    const { error, value } = setUpdateSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
-    const set = await setService.updateSet(id, value);
-    if (!set)
-      return res.status(404).json({ success: false, message: 'Set not found' });
-    return res.json({ success: true, data: set, message: 'Set updated' });
+    const set = await setService.updateSet(id, req.body);
+    if (!set) return response.error(res, 'Set not found', 404);
+    return response.success(res, set, 'Set updated', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
@@ -58,11 +45,10 @@ async function deleteSet(req, res) {
   try {
     const { id } = req.params;
     const set = await setService.deleteSet(id);
-    if (!set)
-      return res.status(404).json({ success: false, message: 'Set not found' });
-    return res.json({ success: true, data: set, message: 'Set deleted' });
+    if (!set) return response.error(res, 'Set not found', 404);
+    return response.success(res, set, 'Set deleted', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 

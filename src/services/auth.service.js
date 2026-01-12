@@ -1,6 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+const { promisify } = require('util');
+const genSalt = promisify(bcrypt.genSalt);
+const hash = promisify(bcrypt.hash);
+const compare = promisify(bcrypt.compare);
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme_secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -13,8 +17,8 @@ async function registerUser({ name, email, password, role }) {
     throw err;
   }
 
-  const salt = await bcrypt.genSalt(10);
-  const hashed = await bcrypt.hash(password, salt);
+  const salt = await genSalt(10);
+  const hashed = await hash(password, salt);
 
   const user = new User({ name, email, password: hashed, role });
   await user.save();
@@ -29,7 +33,7 @@ async function loginUser({ email, password }) {
     throw err;
   }
 
-  const match = await bcrypt.compare(password, user.password);
+  const match = await compare(password, user.password);
   if (!match) {
     const err = new Error('Invalid credentials');
     err.status = 401;

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/set.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/role.middleware');
 
 /**
  * @openapi
@@ -11,6 +10,8 @@ const { requireRole } = require('../middlewares/role.middleware');
  *     tags:
  *       - Sets
  *     summary: Create a question set
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -29,7 +30,6 @@ const { requireRole } = require('../middlewares/role.middleware');
 router.post(
   '/',
   authMiddleware,
-  requireRole('teacher', 'admin'),
   controller.createSet
 );
 
@@ -40,6 +40,8 @@ router.post(
  *     tags:
  *       - Sets
  *     summary: List sets
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of sets
@@ -47,7 +49,7 @@ router.post(
 router.get(
   '/',
   authMiddleware,
-  requireRole('teacher', 'admin'),
+  
   controller.listSets
 );
 
@@ -58,6 +60,8 @@ router.get(
  *     tags:
  *       - Sets
  *     summary: Get a set by id
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -71,7 +75,7 @@ router.get(
 router.get(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
+  
   controller.getSet
 );
 
@@ -82,6 +86,8 @@ router.get(
  *     tags:
  *       - Sets
  *     summary: Update a set
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -106,7 +112,7 @@ router.get(
 router.put(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
+  
   controller.updateSet
 );
 
@@ -117,6 +123,8 @@ router.put(
  *     tags:
  *       - Sets
  *     summary: Delete a set and its questions
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -130,7 +138,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  requireRole('teacher', 'admin'),
+  
   controller.deleteSet
 );
 

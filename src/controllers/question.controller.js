@@ -1,31 +1,13 @@
 const questionService = require('../services/question.service');
-const {
-  questionCreateSchema,
-  questionUpdateSchema,
-} = require('../helpers/validation_schema');
+const response = require('../helpers/response');
 
 async function createQuestion(req, res) {
   try {
-    const payload = req.body;
-    // basic validation
-    const required = ['setId', 'type', 'content', 'answers'];
-    for (const f of required) {
-      if (payload[f] === undefined)
-        return res
-          .status(400)
-          .json({ success: false, message: `${f} is required` });
-    }
-
-    const { error, value } = questionCreateSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
-
-    const q = await questionService.createQuestion(value);
-    return res
-      .status(201)
-      .json({ success: true, data: q, message: 'Question created' });
+    // req.body đã được validate ở middleware
+    const q = await questionService.createQuestion(req.body);
+    return response.success(res, q, 'Question created', 201);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
@@ -34,10 +16,11 @@ async function listQuestions(req, res) {
     const { setId } = req.query;
     const filter = {};
     if (setId) filter.setId = setId;
+
     const list = await questionService.listQuestions(filter);
-    return res.json({ success: true, data: list, message: 'Questions' });
+    return response.success(res, list, 'Questions list', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
@@ -45,30 +28,23 @@ async function getQuestion(req, res) {
   try {
     const { id } = req.params;
     const q = await questionService.getQuestionById(id);
-    if (!q)
-      return res
-        .status(404)
-        .json({ success: false, message: 'Question not found' });
-    return res.json({ success: true, data: q, message: 'Question' });
+    if (!q) return response.error(res, 'Question not found', 404);
+
+    return response.success(res, q, 'Question found', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
 async function updateQuestion(req, res) {
   try {
     const { id } = req.params;
-    const { error, value } = questionUpdateSchema.validate(req.body);
-    if (error)
-      return res.status(400).json({ success: false, message: error.message });
-    const q = await questionService.updateQuestion(id, value);
-    if (!q)
-      return res
-        .status(404)
-        .json({ success: false, message: 'Question not found' });
-    return res.json({ success: true, data: q, message: 'Question updated' });
+    const q = await questionService.updateQuestion(id, req.body);
+    if (!q) return response.error(res, 'Question not found', 404);
+
+    return response.success(res, q, 'Question updated', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
@@ -76,13 +52,11 @@ async function deleteQuestion(req, res) {
   try {
     const { id } = req.params;
     const q = await questionService.deleteQuestion(id);
-    if (!q)
-      return res
-        .status(404)
-        .json({ success: false, message: 'Question not found' });
-    return res.json({ success: true, data: q, message: 'Question deleted' });
+    if (!q) return response.error(res, 'Question not found', 404);
+
+    return response.success(res, q, 'Question deleted', 200);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return response.error(res, err.message, 500);
   }
 }
 
