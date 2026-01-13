@@ -1,6 +1,6 @@
 const MessageCodes = {
     AUTH: {
-        INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+        INVALID_CREDENTIALS: 'Sai mật khẩu hoặc tài khoản',
         ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
         EMAIL_EXISTS: 'EMAIL_EXISTS',
         REFRESH_TOKEN_INVALID: 'REFRESH_TOKEN_INVALID',
