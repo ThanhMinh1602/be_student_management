@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/student.controller');
+const controller = require('../controllers/user.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 /**
  * @openapi
- * /api/students:
+ * /api/user:
  *   get:
  *     tags:
- *       - Students
- *     summary: List students (filter by classId)
+ *       - user
+ *     summary: List user (filter by classId)
  *     parameters:
  *       - in: query
  *         name: classId
@@ -29,16 +29,16 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Students list
+ *         description: user list
  */
 router.get('/', authMiddleware,  controller.list);
 
 /**
  * @openapi
- * /api/students:
+ * /api/user:
  *   post:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Create a new student account
  *     requestBody:
  *       required: true
@@ -65,10 +65,10 @@ router.post('/', authMiddleware,  controller.add);
 
 /**
  * @openapi
- * /api/students/{id}/assign:
+ * /api/user/{id}/assign:
  *   put:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Assign student to a class
  *     parameters:
  *       - in: path
@@ -95,10 +95,10 @@ router.put('/:id/assign', authMiddleware,  controller.assign);
 
 /**
  * @openapi
- * /api/students/{id}/remove-class:
+ * /api/user/{id}/remove-class:
  *   put:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Remove student from class
  *     parameters:
  *       - in: path
@@ -116,10 +116,10 @@ router.put('/:id/remove-class', authMiddleware,  controller.removeFromClass);
 
 /**
  * @openapi
- * /api/students/{id}/toggle-status:
+ * /api/user/{id}/toggle-status:
  *   put:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Toggle student active status
  *     parameters:
  *       - in: path
@@ -137,10 +137,10 @@ router.put('/:id/toggle-status', authMiddleware,  controller.toggleStatus);
 
 /**
  * @openapi
- * /api/students/{id}/reset-password:
+ * /api/user/{id}/reset-password:
  *   put:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Reset student password to default
  *     parameters:
  *       - in: path
@@ -158,10 +158,10 @@ router.put('/:id/reset-password', authMiddleware,  controller.resetPassword);
 
 /**
  * @openapi
- * /api/students/{id}:
+ * /api/user/{id}:
  *   delete:
  *     tags:
- *       - Students
+ *       - user
  *     summary: Delete a student
  *     parameters:
  *       - in: path

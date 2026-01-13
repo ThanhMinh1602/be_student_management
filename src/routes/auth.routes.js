@@ -20,7 +20,7 @@ const { registerSchema, loginSchema } = require('../helpers/validation_schema');
  *             properties:
  *               name:
  *                 type: string
- *               email:
+ *               username:
  *                 type: string
  *               password:
  *                 type: string
@@ -28,7 +28,7 @@ const { registerSchema, loginSchema } = require('../helpers/validation_schema');
  *                 type: string
  *             required:
  *               - name
- *               - email
+ *               - username
  *               - password
  *     responses:
  *       201:
@@ -50,12 +50,12 @@ router.post('/register', validate(registerSchema), controller.register);
  *           schema:
  *             type: object
  *             properties:
- *               email:
+ *               username:
  *                 type: string
  *               password:
  *                 type: string
  *             required:
- *               - email
+ *               - username
  *               - password
  *     responses:
  *       200:
@@ -78,4 +78,29 @@ router.post('/login', validate(loginSchema), controller.login);
  */
 router.get('/me', authMiddleware, controller.me);
 
+/**
+ * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Refresh Access Token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *             required:
+ *               - refreshToken
+ *     responses:
+ *       200:
+ *         description: Token refreshed
+ *       401:
+ *         description: Refresh token invalid or expired
+ */
+router.post('/refresh', controller.refresh);
 module.exports = router;

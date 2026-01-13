@@ -1,15 +1,14 @@
 const Joi = require('joi');
-
 const registerSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).max(128).required(),
-  role: Joi.string().valid('student', 'admin', 'teacher').optional(),
+  name: Joi.string().required(),
+  username: Joi.string().min(3).max(30).required(), // Thay email bằng username
+  password: Joi.string().min(6).required(),
+  role: Joi.string().valid('student', 'admin', 'teacher')
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  username: Joi.string().required(), // Thay email bằng username
+  password: Joi.string().required()
 });
 
 // Set schemas
@@ -45,7 +44,12 @@ const questionUpdateSchema = Joi.object({
   options: Joi.array().items(Joi.string()).optional(),
   answers: Joi.array().items(Joi.string()).optional(),
 });
-
+const studentCreateSchema = Joi.object({
+  fullName: Joi.string().min(3).required(),
+  username: Joi.string().min(3).required(),
+  password: Joi.string().min(6).default('123456'),
+  role: Joi.string().valid('student', 'teacher', 'admin').default('student')
+});
 module.exports = {
   registerSchema,
   loginSchema,
@@ -53,4 +57,5 @@ module.exports = {
   setUpdateSchema,
   questionCreateSchema,
   questionUpdateSchema,
+  studentCreateSchema,
 };
