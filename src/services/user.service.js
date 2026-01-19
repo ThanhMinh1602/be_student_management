@@ -35,7 +35,7 @@ async function removeStudentFromClass(studentId) {
   return User.findByIdAndUpdate(studentId, { classId: '' }, { new: true });
 }
 
-async function addStudent({ fullName, username, role = 'User', password = '123456' }) {
+async function addStudent({ name, username, role, password = '123456' }) {
   const exists = await User.findOne({ username });
   if (exists) {
     const err = new Error(MessageCodes.AUTH.EMAIL_EXISTS); // Dùng chung mã lỗi tồn tại
@@ -48,7 +48,7 @@ async function addStudent({ fullName, username, role = 'User', password = '12345
   const hashed = await bcrypt.hash(password, salt);
 
   const s = new User({
-    name: fullName, // Map fullName sang name trong User schema gộp
+    name,
     username,
     role,
     password: hashed
@@ -73,7 +73,36 @@ async function resetPassword(id) {
 async function deleteStudent(id) {
   return User.findByIdAndDelete(id);
 }
+async function updateUser(id, updateData) {
+  // 1. Kiểm tra user có tồn tại không
+  const user = await User.findById(id);
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
 
+  // 2. Kiểm tra trùng Username (Nếu có gửi lên username mới)
+  if (updateData.username && updateData.username !== user.username) {
+    const exists = await User.findOne({ username: updateData.username });
+    if (exists) {
+      const err = new Error('Username already exists'); // Hoặc MessageCodes.AUTH.EMAIL_EXISTS
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  // 3. Nếu có gửi password mới -> Hash mật khẩu
+  if (updateData.password) {
+    const salt = await bcrypt.genSalt(10);
+    updateData.password = await bcrypt.hash(updateData.password, salt);
+  }
+
+  // 4. Thực hiện update
+  // { new: true } để trả về data mới nhất sau khi update
+  // { runValidators: true } để đảm bảo dữ liệu tuân thủ Schema (ví dụ enum role)
+  return User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+}
 module.exports = {
   listuser,
   getuserByClass,
@@ -84,4 +113,5 @@ module.exports = {
   toggleStatus,
   resetPassword,
   deleteStudent,
+  updateUser,
 };

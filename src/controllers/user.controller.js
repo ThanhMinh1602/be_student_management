@@ -2,12 +2,12 @@ const userService = require('../services/user.service');
 const response = require('../helpers/response');
 const MessageCodes = require('../constants/messageCodes');
 // Import schema validation đã tạo
-const { studentCreateSchema } = require('../helpers/validation_schema');
+const { registerSchema } = require('../helpers/validation_schema');
 
 async function list(req, res) {
   try {
-    const { classId, page, limit } = req.query;
-    const result = await userService.listStudents({ classId, page, limit }); // Đổi tên hàm cho đúng service
+    const { classId, role, page, limit } = req.query;
+    const result = await userService.listuser({ classId, role, page, limit }); // Đổi tên hàm cho đúng service
     return response.success(res, result, MessageCodes.USER.CURRENT_USER, 200);
   } catch (err) {
     return response.error(res, err.message || MessageCodes.INTERNAL, err.status || 500);
@@ -17,7 +17,8 @@ async function list(req, res) {
 async function add(req, res) {
   try {
     // 1. Validate dữ liệu đầu vào bằng Joi
-    const { error, value } = studentCreateSchema.validate(req.body);
+    const { error, value } = registerSchema.validate(req.body);
+    console.log(value);
 
     // Nếu có lỗi (vd: role là "string" thay vì "student"), trả về lỗi Validation ngay
     if (error) {
@@ -97,6 +98,29 @@ async function remove(req, res) {
   }
 }
 
+async function update(req, res) {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    // Lưu ý: Với update, ta không dùng registerSchema để validate 
+    // vì registerSchema thường bắt buộc (required) tất cả các trường.
+    // Ở đây ta cho phép update từng phần (dynamic).
+
+    const updated = await userService.updateUser(id, data);
+
+    // Nếu service ném lỗi hoặc trả về null thì catch sẽ bắt hoặc dòng dưới check
+    if (!updated) return response.error(res, MessageCodes.USER.NOT_FOUND, 404);
+
+    return response.success(res, updated, 'User updated successfully', 200);
+  } catch (err) {
+    // Check lỗi trùng username từ service ném ra
+    if (err.message === 'Username already exists') {
+      return response.error(res, MessageCodes.AUTH.EMAIL_EXISTS, 400);
+    }
+    return response.error(res, err.message || MessageCodes.INTERNAL, err.status || 500);
+  }
+}
 module.exports = {
   list,
   add,
@@ -105,4 +129,5 @@ module.exports = {
   toggleStatus,
   resetPassword,
   remove,
+  update,
 };

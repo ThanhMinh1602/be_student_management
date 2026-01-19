@@ -9,17 +9,21 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *   get:
  *     tags:
  *       - user
- *     summary: List user (filter by classId)
+ *     summary: List user
  *     parameters:
  *       - in: query
  *         name: classId
  *         schema:
  *           type: string
  *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: Page number (1-based)
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
@@ -31,7 +35,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       200:
  *         description: user list
  */
-router.get('/', authMiddleware,  controller.list);
+router.get('/', authMiddleware, controller.list);
 
 /**
  * @openapi
@@ -61,7 +65,7 @@ router.get('/', authMiddleware,  controller.list);
  *       201:
  *         description: Student created
  */
-router.post('/', authMiddleware,  controller.add);
+router.post('/', authMiddleware, controller.add);
 
 /**
  * @openapi
@@ -91,7 +95,7 @@ router.post('/', authMiddleware,  controller.add);
  *       200:
  *         description: Assigned
  */
-router.put('/:id/assign', authMiddleware,  controller.assign);
+router.put('/:id/assign', authMiddleware, controller.assign);
 
 /**
  * @openapi
@@ -112,7 +116,7 @@ router.put('/:id/assign', authMiddleware,  controller.assign);
  *       200:
  *         description: Removed from class
  */
-router.put('/:id/remove-class', authMiddleware,  controller.removeFromClass);
+router.put('/:id/remove-class', authMiddleware, controller.removeFromClass);
 
 /**
  * @openapi
@@ -133,7 +137,7 @@ router.put('/:id/remove-class', authMiddleware,  controller.removeFromClass);
  *       200:
  *         description: Status toggled
  */
-router.put('/:id/toggle-status', authMiddleware,  controller.toggleStatus);
+router.put('/:id/toggle-status', authMiddleware, controller.toggleStatus);
 
 /**
  * @openapi
@@ -154,7 +158,7 @@ router.put('/:id/toggle-status', authMiddleware,  controller.toggleStatus);
  *       200:
  *         description: Password reset
  */
-router.put('/:id/reset-password', authMiddleware,  controller.resetPassword);
+router.put('/:id/reset-password', authMiddleware, controller.resetPassword);
 
 /**
  * @openapi
@@ -175,6 +179,42 @@ router.put('/:id/reset-password', authMiddleware,  controller.resetPassword);
  *       200:
  *         description: Deleted
  */
-router.delete('/:id', authMiddleware,  controller.remove);
+router.delete('/:id', authMiddleware, controller.remove);
+/**
+ * @openapi
+ * /api/user/{id}:
+ *   put:
+ *     tags:
+ *       - user
+ *     summary: Update user info (Dynamic update)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [student, teacher, admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User updated
+ */
+router.put('/:id', authMiddleware, controller.update);
 
 module.exports = router;

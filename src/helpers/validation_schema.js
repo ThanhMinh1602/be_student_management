@@ -44,12 +44,7 @@ const questionUpdateSchema = Joi.object({
   options: Joi.array().items(Joi.string()).optional(),
   answers: Joi.array().items(Joi.string()).optional(),
 });
-const studentCreateSchema = Joi.object({
-  fullName: Joi.string().min(3).required(),
-  username: Joi.string().min(3).required(),
-  password: Joi.string().min(6).default('123456'),
-  role: Joi.string().valid('student', 'teacher', 'admin').default('student')
-});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -57,5 +52,4 @@ module.exports = {
   setUpdateSchema,
   questionCreateSchema,
   questionUpdateSchema,
-  studentCreateSchema,
 };
