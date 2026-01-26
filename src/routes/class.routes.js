@@ -43,6 +43,10 @@ router.get('/', authMiddleware, controller.list);
  *             properties:
  *               name:
  *                 type: string
+ *               schedule:
+ *                 type: string
+ *               subject:
+ *                 type: string
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -93,6 +97,10 @@ router.get('/:id', authMiddleware, controller.get);
  *             type: object
  *             properties:
  *               name:
+ *                 type: string
+ *               schedule:
+ *                 type: string
+ *               subject:
  *                 type: string
  *     security:
  *       - bearerAuth: []

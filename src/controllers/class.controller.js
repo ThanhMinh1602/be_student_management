@@ -3,7 +3,7 @@ const response = require('../helpers/response');
 
 async function list(req, res) {
   try {
-    const {  page, limit } = req.query;
+    const { page, limit } = req.query;
     const result = await classService.listClasses({ page, limit });
     return response.success(res, result, 'Classes list', 200);
   } catch (err) {
@@ -24,8 +24,7 @@ async function get(req, res) {
 
 async function add(req, res) {
   try {
-    const { name } = req.body;
-    const c = await classService.createClass({ name });
+    const c = await classService.createClass(req.body);
     return response.success(res, c, 'Class created', 201);
   } catch (err) {
     return response.error(res, err.message || err, err.status || 500);
