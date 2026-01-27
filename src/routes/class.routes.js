@@ -123,4 +123,85 @@ router.put('/:id', authMiddleware, controller.update);
  */
 router.delete('/:id', authMiddleware, controller.remove);
 
+/**
+ * @openapi
+ * /api/classes/{id}/add-student:
+ *   put:
+ *     tags:
+ *       - Classes
+ *     summary: Thêm một học sinh vào lớp học
+ *     description: Cập nhật danh sách thành viên của lớp bằng cách thêm ID của học sinh.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID của lớp học
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - studentId
+ *             properties:
+ *               studentId:
+ *                 type: string
+ *                 description: ID của user (học sinh) muốn thêm vào lớp
+ *                 example: "65b2a1f8e4b0a123456789ab"
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Thêm học sinh thành công
+ *       '404':
+ *         description: Không tìm thấy lớp học hoặc học sinh
+ *       '500':
+ *         description: Lỗi hệ thống
+ */
+router.put('/:id/add-student', authMiddleware, controller.addStudentToClass);
+
+
+/**
+ * @openapi
+ * /api/classes/{id}/remove-student:
+ *   put:
+ *     tags:
+ *       - Classes
+ *     summary: Xóa một học sinh khỏi lớp học
+ *     description: Cập nhật danh sách thành viên của lớp bằng cách xóa ID của học sinh.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID của lớp học
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - studentId
+ *             properties:
+ *               studentId:
+ *                 type: string
+ *                 description: ID của user (học sinh) muốn xóa khỏi lớp
+ *                 example: "65b2a1f8e4b0a123456789ab"
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Xóa học sinh thành công
+ *       '404':
+ *         description: Không tìm thấy lớp học hoặc học sinh
+ *       '500':
+ *         description: Lỗi hệ thống
+ */
+router.put('/:id/remove-student', authMiddleware, controller.removeStudent);
+
 module.exports = router;
