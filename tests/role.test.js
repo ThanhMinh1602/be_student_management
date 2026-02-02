@@ -25,33 +25,29 @@ describe('Role-based access control', () => {
   let createdSetId;
 
   test('register and login teacher & student', async () => {
-    const t = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: 'T',
-        email: 't@example.com',
-        password: 'pass',
-        role: 'teacher',
-      });
+    const t = await request(app).post('/api/auth/register').send({
+      name: 'T',
+      username: 't@example.com',
+      password: 'password',
+      role: 'teacher',
+    });
     expect(t.status).toBe(201);
     const lt = await request(app)
       .post('/api/auth/login')
-      .send({ email: 't@example.com', password: 'pass' });
+      .send({ username: 't@example.com', password: 'password' });
     expect(lt.status).toBe(200);
     teacherToken = lt.body.data.token;
 
-    const s = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: 'S',
-        email: 's@example.com',
-        password: 'pass',
-        role: 'student',
-      });
+    const s = await request(app).post('/api/auth/register').send({
+      name: 'S',
+      username: 's@example.com',
+      password: 'password',
+      role: 'student',
+    });
     expect(s.status).toBe(201);
     const ls = await request(app)
       .post('/api/auth/login')
-      .send({ email: 's@example.com', password: 'pass' });
+      .send({ username: 's@example.com', password: 'password' });
     expect(ls.status).toBe(200);
     studentToken = ls.body.data.token;
   });

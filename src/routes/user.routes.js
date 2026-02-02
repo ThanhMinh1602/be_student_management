@@ -51,7 +51,7 @@ router.get('/', authMiddleware, controller.list);
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
+ *               name:
  *                 type: string
  *               username:
  *                 type: string
@@ -66,57 +66,6 @@ router.get('/', authMiddleware, controller.list);
  *         description: Student created
  */
 router.post('/', authMiddleware, controller.add);
-
-/**
- * @openapi
- * /api/user/{id}/assign:
- *   put:
- *     tags:
- *       - user
- *     summary: Assign student to a class
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               classId:
- *                 type: string
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Assigned
- */
-router.put('/:id/assign', authMiddleware, controller.assign);
-
-/**
- * @openapi
- * /api/user/{id}/remove-class:
- *   put:
- *     tags:
- *       - user
- *     summary: Remove student from class
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Removed from class
- */
-router.put('/:id/remove-class', authMiddleware, controller.removeFromClass);
 
 /**
  * @openapi

@@ -3,8 +3,7 @@ const response = require('../helpers/response');
 
 async function createAssignment(req, res) {
   try {
-    // Payload có thể lấy teacherId từ authMiddleware nếu cần
-    const a = await assignmentService.createAsssignment(req.body);
+    const a = await assignmentService.createAssignment(req.body);
     return response.success(
       res,
       a,
@@ -12,7 +11,6 @@ async function createAssignment(req, res) {
       201,
     );
   } catch (err) {
-    // Nếu là lỗi logic (400) hoặc lỗi server (500)
     return response.error(res, err.message, err.statusCode || 500);
   }
 }

@@ -3,7 +3,6 @@ const ClassModel = require('../models/Class');
 const StudentResultModel = require('../models/StudentResult');
 
 async function createAsssignment(payload) {
-  // 1. Kiểm tra trùng lặp (tránh giao 1 bộ đề cho 1 lớp nhiều lần cùng lúc)
   const existing = await AssignmentModel.findOne({
     setId: payload.setId,
     classId: payload.classId,
@@ -15,7 +14,6 @@ async function createAsssignment(payload) {
     throw error;
   }
 
-  // 2. Kiểm tra lớp học
   const targetClass = await ClassModel.findById(payload.classId);
   if (!targetClass) {
     const error = new Error('Lớp học không tồn tại');
@@ -23,18 +21,16 @@ async function createAsssignment(payload) {
     throw error;
   }
 
-  // 3. Lưu Assignment Master
   const a = new AssignmentModel(payload);
   await a.save();
 
-  // 4. Tự động tạo bản ghi StudentResult cho tất cả sinh viên trong lớp
   if (targetClass.students && targetClass.students.length > 0) {
     const studentResults = targetClass.students.map((studentId) => ({
       assignmentId: a._id,
       studentId: studentId,
       status: 'assigned',
     }));
-    // Dùng insertMany để tối ưu hiệu năng
+
     await StudentResultModel.insertMany(studentResults);
   }
 
@@ -54,19 +50,27 @@ async function updateAssignment(id, payload) {
 async function deleteAssignment(id) {
   const a = await AssignmentModel.findByIdAndDelete(id);
   if (a) {
-    // Xóa tất cả các bài làm liên quan khi xóa bài tập gốc (Cascade delete)
     await StudentResultModel.deleteMany({ assignmentId: id });
   }
   return a;
 }
-
 async function listAssignments(filter = {}, options = {}) {
-  return AssignmentModel.find(filter)
+  const assignments = await AssignmentModel.find(filter)
     .sort({ createdAt: -1 })
     .limit(options.limit || 0)
-    .populate(['classId', 'setId']);
-}
+    .select('title dueDate classId setId')
+    .populate({ path: 'classId', select: 'name' })
+    .populate({ path: 'setId', select: 'title' })
+    .lean();
 
+  return assignments.map((item) => ({
+    id: item._id,
+    questionName: item.title,
+    className: item.classId?.name || 'Không xác định',
+    setName: item.setId?.title || 'Không xác định',
+    deadline: item.dueDate,
+  }));
+}
 module.exports = {
   createAsssignment,
   getAssignmentById,

@@ -1,35 +1,50 @@
 const SetModel = require('../models/Set');
 const QuestionModel = require('../models/Question');
+const SetResource = require('../resources/set.resource');
 
 async function createSet({ name }) {
   const set = new SetModel({ name, questionCount: 0 });
   await set.save();
-  return set;
+  return SetResource.single(set);
 }
 
 async function getAllSets() {
-  return SetModel.find().sort({ createdAt: -1 });
+  const sets = await SetModel.find().sort({ createdAt: -1 }).lean();
+
+  return sets.map((set) => SetResource.single(set));
 }
 
 async function getSetById(id) {
-  return SetModel.findById(id);
+  const set = await SetModel.findById(id).lean();
+  if (!set) return null;
+
+  const questions = await QuestionModel.find({ setId: id })
+    .sort({ createdAt: 1 })
+    .lean();
+
+  return SetResource.detail(set, questions);
 }
 
 async function updateSet(id, payload) {
-  return SetModel.findByIdAndUpdate(id, payload, { new: true });
+  const set = await SetModel.findByIdAndUpdate(id, payload, {
+    new: true,
+  }).lean();
+  if (!set) return null;
+
+  return SetResource.single(set);
 }
 
 async function deleteSet(id) {
-  // Delete questions belonging to set and the set itself
   await QuestionModel.deleteMany({ setId: id });
-  return SetModel.findByIdAndDelete(id);
+  const set = await SetModel.findByIdAndDelete(id);
+  return set ? SetResource.single(set) : null;
 }
 
 async function incrementQuestionCount(setId, delta = 1) {
   return SetModel.findByIdAndUpdate(
     setId,
     { $inc: { questionCount: delta } },
-    { new: true }
+    { new: true },
   );
 }
 

@@ -11,6 +11,7 @@ const debugRoutes = require('./routes/debug.routes');
 const classRoutes = require('./routes/class.routes');
 const userRoutes = require('./routes/user.routes');
 const assignmentRoutes = require('./routes/assignment.routes');
+const studentResultRoutes = require('./routes/studentResult.routes');
 
 const app = express();
 app.use(cors());
@@ -27,5 +28,6 @@ app.use('/api/debug', debugRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/student-results', studentResultRoutes);
 
 module.exports = app;

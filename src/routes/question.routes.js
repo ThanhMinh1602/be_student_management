@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/question.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const { requireRole } = require('../middlewares/role.middleware');
 
 /**
  * @openapi
@@ -48,7 +49,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 router.post(
   '/',
   authMiddleware,
-  controller.createQuestion
+  requireRole('teacher', 'admin'),
+  controller.createQuestion,
 );
 
 /**
@@ -72,7 +74,8 @@ router.post(
 router.get(
   '/',
   authMiddleware,
-  controller.listQuestions
+  requireRole('teacher', 'admin'),
+  controller.listQuestions,
 );
 
 /**
@@ -94,11 +97,7 @@ router.get(
  *       200:
  *         description: Question
  */
-router.get(
-  '/:id',
-  authMiddleware,
-  controller.getQuestion
-);
+router.get('/:id', authMiddleware, controller.getQuestion);
 
 /**
  * @openapi
@@ -143,7 +142,8 @@ router.get(
 router.put(
   '/:id',
   authMiddleware,
-  controller.updateQuestion
+  requireRole('teacher', 'admin'),
+  controller.updateQuestion,
 );
 
 /**
@@ -168,7 +168,8 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  controller.deleteQuestion
+  requireRole('teacher', 'admin'),
+  controller.deleteQuestion,
 );
 
 module.exports = router;

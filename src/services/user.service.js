@@ -1,10 +1,18 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const UserResource = require('../resources/user.resource');
 
-async function listuser(filter = {}) {
+async function listUser(filter = {}) {
   const query = {};
   if (filter.classId) query.classId = filter.classId;
   if (filter.role) query.role = filter.role;
+  // Tìm kiếm theo tên hoặc username (nếu cần)
+  if (filter.keyword) {
+    query.$or = [
+      { name: { $regex: filter.keyword, $options: 'i' } },
+      { username: { $regex: filter.keyword, $options: 'i' } },
+    ];
+  }
 
   // Pagination support
   const page = Math.max(parseInt(filter.page, 10) || 1, 1);
@@ -12,69 +20,90 @@ async function listuser(filter = {}) {
   const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
-    User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(), // Tối ưu hiệu năng: trả về JSON thuần
     User.countDocuments(query),
   ]);
 
-  return { items, total };
+  return {
+    total,
+    items: UserResource.collection(items),
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
-async function getuserByClass(classId) {
-  return User.find({ classId, role: 'User' });
+async function getUserByClass(classId) {
+  if (!classId) return { total: 0, items: [] };
+  const users = await User.find({ classId, role: 'User' }).lean();
+  const items = UserResource.collection(users);
+
+  return { total: items.length, items };
 }
 
 async function countByClass(classId) {
   return User.countDocuments({ classId, role: 'User' });
 }
-
-async function assignStudentToClass(studentId, classId) {
-  return User.findByIdAndUpdate(studentId, { classId }, { new: true });
-}
-
-async function removeStudentFromClass(studentId) {
-  return User.findByIdAndUpdate(studentId, { classId: '' }, { new: true });
-}
-
 async function addStudent({ name, username, role, password = '123456' }) {
+  // 1. Kiểm tra tồn tại
   const exists = await User.findOne({ username });
   if (exists) {
-    const err = new Error(MessageCodes.AUTH.EMAIL_EXISTS); // Dùng chung mã lỗi tồn tại
-    err.status = 400;
+    const err = new Error('Username already exists');
+    err.status = 400; // Bad Request
     throw err;
   }
 
-  // Hash mật khẩu tương tự như authService
+  // 2. Hash mật khẩu
   const salt = await bcrypt.genSalt(10);
   const hashed = await bcrypt.hash(password, salt);
 
-  const s = new User({
+  // 3. Tạo User
+  const newUser = new User({
     name,
     username,
-    role,
-    password: hashed
+    role: role || 'student',
+    password: hashed,
+    isActive: true, // Mặc định kích hoạt
+    avgScore: 0,
   });
-  return s.save();
+
+  await newUser.save();
+  return UserResource.single(newUser);
 }
 
 async function toggleStatus(id) {
-  const stu = await User.findById(id);
-  if (!stu) return null;
-  stu.isActive = !stu.isActive;
-  return stu.save();
+  const user = await User.findById(id);
+  if (!user) return null;
+
+  // Đảo ngược trạng thái hiện tại
+  user.isActive = !user.isActive;
+  await user.save();
+
+  return UserResource.single(user);
 }
 
 async function resetPassword(id) {
-  const stu = await User.findById(id);
-  if (!stu) return null;
-  stu.password = '123456';
-  return stu.save();
+  const user = await User.findById(id);
+  if (!user) return null;
+
+  // QUAN TRỌNG: Phải hash mật khẩu mới
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash('123456', salt);
+
+  user.password = hashed;
+  await user.save();
+
+  return UserResource.single(user);
 }
 
 async function deleteStudent(id) {
-  return User.findByIdAndDelete(id);
+  const deletedUser = await User.findByIdAndDelete(id);
+  // Nên trả về thông tin user đã xóa để FE cập nhật UI nếu cần
+  return UserResource.single(deletedUser);
 }
+
 async function updateUser(id, updateData) {
-  // 1. Kiểm tra user có tồn tại không
+  // 1. Kiểm tra user tồn tại
   const user = await User.findById(id);
   if (!user) {
     const err = new Error('User not found');
@@ -82,33 +111,35 @@ async function updateUser(id, updateData) {
     throw err;
   }
 
-  // 2. Kiểm tra trùng Username (Nếu có gửi lên username mới)
+  // 2. Kiểm tra trùng Username (nếu có đổi)
   if (updateData.username && updateData.username !== user.username) {
     const exists = await User.findOne({ username: updateData.username });
     if (exists) {
-      const err = new Error('Username already exists'); // Hoặc MessageCodes.AUTH.EMAIL_EXISTS
+      const err = new Error('Username already exists');
       err.status = 400;
       throw err;
     }
   }
 
-  // 3. Nếu có gửi password mới -> Hash mật khẩu
+  // 3. Nếu có đổi password -> Hash lại
   if (updateData.password) {
     const salt = await bcrypt.genSalt(10);
     updateData.password = await bcrypt.hash(updateData.password, salt);
   }
 
-  // 4. Thực hiện update
-  // { new: true } để trả về data mới nhất sau khi update
-  // { runValidators: true } để đảm bảo dữ liệu tuân thủ Schema (ví dụ enum role)
-  return User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  // 4. Update
+  const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  return UserResource.single(updatedUser);
 }
+
 module.exports = {
-  listuser,
-  getuserByClass,
+  listUser,
+  getUserByClass,
   countByClass,
-  assignStudentToClass,
-  removeStudentFromClass,
   addStudent,
   toggleStatus,
   resetPassword,

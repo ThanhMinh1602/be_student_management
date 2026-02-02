@@ -6,18 +6,18 @@ const compare = promisify(bcrypt.compare);
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const MessageCodes = require('../constants/messageCodes');
+const UserResource = require('../resources/user.resource');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme_secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
-// Thêm hằng số cho Refresh Token
+
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'changeme_refresh_secret';
 const REFRESH_EXPIRES_IN = process.env.REFRESH_EXPIRES_IN || '7d';
 
 async function registerUser({ name, username, password, role }) {
-  // Kiểm tra trùng lặp username thay vì email
   const existing = await User.findOne({ username });
   if (existing) {
-    const err = new Error(MessageCodes.AUTH.EMAIL_EXISTS); 
+    const err = new Error(MessageCodes.AUTH.EMAIL_EXISTS);
     err.status = 400;
     throw err;
   }
@@ -25,14 +25,12 @@ async function registerUser({ name, username, password, role }) {
   const salt = await genSalt(10);
   const hashed = await hash(password, salt);
 
-  // Tạo user với username
   const user = new User({ name, username, password: hashed, role });
   await user.save();
-  return user;
+  return UserResource.single(user);
 }
 
 async function loginUser({ username, password }) {
-  // 1. Tìm kiếm bằng username
   const user = await User.findOne({ username });
 
   if (!user) {
@@ -41,14 +39,12 @@ async function loginUser({ username, password }) {
     throw err;
   }
 
-  // 2. Kiểm tra tài khoản bị khóa
   if (user.isActive === false) {
     const err = new Error(MessageCodes.AUTH.ACCOUNT_LOCKED);
     err.status = 403;
     throw err;
   }
 
-  // 3. Kiểm tra mật khẩu
   const match = await compare(password, user.password);
   if (!match) {
     const err = new Error(MessageCodes.AUTH.INVALID_CREDENTIALS);
@@ -56,14 +52,16 @@ async function loginUser({ username, password }) {
     throw err;
   }
 
-  // 4. Tạo bộ đôi token
   const tokens = generateTokens(user);
-  return { ...tokens, user };
+  return {
+    token: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    user: UserResource.single(user),
+  };
 }
 
 async function refreshAccessToken(token) {
   try {
-    // Xác thực refresh token
     const payload = jwt.verify(token, REFRESH_SECRET);
     const user = await User.findById(payload.id);
 
@@ -73,11 +71,10 @@ async function refreshAccessToken(token) {
       throw err;
     }
 
-    // Cấp lại accessToken mới (giữ nguyên refreshToken cũ hoặc tạo mới tùy chiến lược)
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN },
     );
 
     return accessToken;
@@ -88,13 +85,18 @@ async function refreshAccessToken(token) {
   }
 }
 async function getUserById(id) {
-  return User.findById(id).select('-password');
+  const user = await User.findById(id);
+  return UserResource.single(user);
 }
 function generateTokens(user) {
   const payload = { id: user._id, role: user.role };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-  const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES_IN });
+  const accessToken = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  });
+  const refreshToken = jwt.sign(payload, REFRESH_SECRET, {
+    expiresIn: REFRESH_EXPIRES_IN,
+  });
 
   return { accessToken, refreshToken };
 }

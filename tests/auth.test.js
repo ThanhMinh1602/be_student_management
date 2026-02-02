@@ -2,7 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../src/app');
-const User = require('../src/models/user.model');
+const User = require('../src/models/User');
 
 let mongoServer;
 
@@ -34,18 +34,18 @@ describe('Auth API', () => {
   test('Register -> Login -> Me flow', async () => {
     const payload = {
       name: 'Test User',
-      email: 'test@example.com',
+      username: 'test@example.com',
       password: 'password123',
     };
 
     const reg = await request(app).post('/api/auth/register').send(payload);
     expect(reg.status).toBe(201);
     expect(reg.body.success).toBe(true);
-    expect(reg.body.data.email).toBe('test@example.com');
+    expect(reg.body.data.username).toBe('test@example.com');
 
     const login = await request(app)
       .post('/api/auth/login')
-      .send({ email: payload.email, password: payload.password });
+      .send({ username: payload.username, password: payload.password });
     expect(login.status).toBe(200);
     expect(login.body.success).toBe(true);
     const { token } = login.body.data;
@@ -56,6 +56,6 @@ describe('Auth API', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(me.status).toBe(200);
     expect(me.body.success).toBe(true);
-    expect(me.body.data.email).toBe(payload.email);
+    expect(me.body.data.username).toBe(payload.username);
   });
 });

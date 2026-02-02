@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/assignment.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const { requireRole } = require('../middlewares/role.middleware');
 
 /**
  * @openapi
@@ -34,7 +35,12 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       201:
  *         description: Assigned successfully
  */
-router.post('/', authMiddleware, controller.createAssignment);
+router.post(
+  '/',
+  authMiddleware,
+  requireRole('teacher', 'admin'),
+  controller.createAssignment,
+);
 
 /**
  * @openapi
@@ -110,7 +116,12 @@ router.get('/:id', authMiddleware, controller.getAssignment);
  *       200:
  *         description: Updated successfully
  */
-router.put('/:id', authMiddleware, controller.updateAssignment);
+router.put(
+  '/:id',
+  authMiddleware,
+  requireRole('teacher', 'admin'),
+  controller.updateAssignment,
+);
 
 /**
  * @openapi
@@ -131,6 +142,11 @@ router.put('/:id', authMiddleware, controller.updateAssignment);
  *       200:
  *         description: Deleted successfully
  */
-router.delete('/:id', authMiddleware, controller.deleteAssignment);
+router.delete(
+  '/:id',
+  authMiddleware,
+  requireRole('teacher', 'admin'),
+  controller.deleteAssignment,
+);
 
 module.exports = router;
