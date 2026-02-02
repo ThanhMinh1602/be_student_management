@@ -1,6 +1,7 @@
 const ClassModel = require('../models/Class');
 const UserModel = require('../models/User');
 const ClassResource = require('../resources/class.resource');
+const UserResource = require('../resources/user.resource');
 
 async function listClasses(filter = {}) {
   const query = {};
@@ -48,7 +49,7 @@ async function updateClass(id, data) {
 async function deleteClass(id) {
   return ClassResource.single(await ClassModel.findByIdAndDelete(id));
 }
-// mới check tới đây -> đang sai
+
 async function addStudentToClass(classId, studentId) {
   const c = await ClassModel.findById(classId);
   if (!c) {
@@ -74,7 +75,7 @@ async function addStudentToClass(classId, studentId) {
     throw error;
   }
 
-  return ClassResource.single(studentInfo);
+  return UserResource.single(studentInfo);
 }
 
 async function removeStudentFromClass(classId, studentId) {

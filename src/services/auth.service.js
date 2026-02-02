@@ -54,7 +54,7 @@ async function loginUser({ username, password }) {
 
   const tokens = generateTokens(user);
   return {
-    token: tokens.accessToken,
+    accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
     user: UserResource.single(user),
   };

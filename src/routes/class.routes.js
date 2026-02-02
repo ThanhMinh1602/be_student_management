@@ -98,8 +98,6 @@ router.get('/:id', authMiddleware, controller.get);
  *                 type: string
  *               schedule:
  *                 type: string
- *               subject:
- *                 type: string
  *     security:
  *       - bearerAuth: []
  *     responses:
