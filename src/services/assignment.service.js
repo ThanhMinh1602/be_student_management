@@ -1,8 +1,9 @@
 const AssignmentModel = require('../models/Assignment');
 const ClassModel = require('../models/Class');
 const StudentResultModel = require('../models/StudentResult');
+const AssignmentResource = require('../resources/assignment.resource');
 
-async function createAsssignment(payload) {
+async function createAssignment(payload) {
   const existing = await AssignmentModel.findOne({
     setId: payload.setId,
     classId: payload.classId,
@@ -34,17 +35,21 @@ async function createAsssignment(payload) {
     await StudentResultModel.insertMany(studentResults);
   }
 
-  return a.populate(['classId', 'setId']);
+  const assignment = await a.populate(['classId', 'setId']);
+  console.log('Created assignment:', assignment);
+  return AssignmentResource.single(assignment);
 }
 
 async function getAssignmentById(id) {
-  return AssignmentModel.findById(id).populate(['classId', 'setId']);
+  const assignment = await AssignmentModel.findById(id).populate(['classId', 'setId']);
+  return AssignmentResource.single(assignment);
 }
 
 async function updateAssignment(id, payload) {
-  return AssignmentModel.findByIdAndUpdate(id, payload, { new: true }).populate(
+  const assignment = await AssignmentModel.findByIdAndUpdate(id, payload, { new: true }).populate(
     ['classId', 'setId'],
   );
+  return AssignmentResource.single(assignment);
 }
 
 async function deleteAssignment(id) {
@@ -52,27 +57,19 @@ async function deleteAssignment(id) {
   if (a) {
     await StudentResultModel.deleteMany({ assignmentId: id });
   }
-  return a;
+  return AssignmentResource.single(a);
 }
+
 async function listAssignments(filter = {}, options = {}) {
   const assignments = await AssignmentModel.find(filter)
     .sort({ createdAt: -1 })
     .limit(options.limit || 0)
-    .select('title dueDate classId setId')
-    .populate({ path: 'classId', select: 'name' })
-    .populate({ path: 'setId', select: 'title' })
-    .lean();
+    .populate(['classId', 'setId']);
 
-  return assignments.map((item) => ({
-    id: item._id,
-    questionName: item.title,
-    className: item.classId?.name || 'Không xác định',
-    setName: item.setId?.title || 'Không xác định',
-    deadline: item.dueDate,
-  }));
+  return AssignmentResource.collection(assignments);
 }
 module.exports = {
-  createAsssignment,
+  createAssignment,
   getAssignmentById,
   updateAssignment,
   deleteAssignment,
