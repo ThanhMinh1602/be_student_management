@@ -45,8 +45,6 @@ router.get('/', authMiddleware, controller.list);
  *                 type: string
  *               schedule:
  *                 type: string
- *               subject:
- *                 type: string
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -170,7 +168,6 @@ router.delete('/:id', authMiddleware, controller.remove);
  *         description: Lỗi hệ thống
  */
 router.put('/:id/add-student', authMiddleware, controller.addStudentToClass);
-
 
 /**
  * @openapi

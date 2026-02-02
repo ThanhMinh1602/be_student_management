@@ -7,7 +7,6 @@ const classSchema = new mongoose.Schema(
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     schedule: { type: String },
-    subject: { type: String },
   },
   { timestamps: true },
 );
